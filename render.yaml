@@ -1,23 +1,16 @@
-# Render Blueprint — deploy backend + frontend + PostgreSQL
+# Render Blueprint — 100% Free Tier (No Credit Card / Payment Required)
 # Docs: https://render.com/docs/blueprint-spec
-
-databases:
-  - name: chatbot-db
-    plan: free
-    databaseName: chatbot
-    user: chatbot
 
 services:
   - type: web
     name: chatbot-backend
     runtime: python
+    plan: free
     buildCommand: pip install -r backend/requirements.txt
     startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: chatbot-db
-          property: connectionString
+        value: sqlite:///./chatbot.db
       - key: SECRET_KEY
         generateValue: true
       - key: LLM_PROVIDER
