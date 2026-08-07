@@ -1,0 +1,41 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+ENV/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+build/
+.npm/
+
+# Uploads & Databases
+uploads/
+*.db
+*.sqlite
+*.sqlite3
+
+# OS & Junk Files
+.DS_Store
+__MACOSX/
+*.swp
+*.swo
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Docker & Persistence
+pgdata/
+pgdata*/
