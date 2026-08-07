@@ -31,7 +31,7 @@ services:
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_URL
-        value: https://chatbot-backend.onrender.com/api
+        value: https://chatbot-backend-b7df.onrender.com/api
     routes:
       - type: rewrite
         source: /*
