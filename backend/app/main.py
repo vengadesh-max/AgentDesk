@@ -5,6 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from app.config import get_settings
@@ -16,10 +17,16 @@ logger = logging.getLogger(__name__)
 
 
 def _init_db(max_retries: int = 30, delay: float = 2.0) -> None:
-    """Wait for PostgreSQL and create tables."""
+    """Wait for database, create tables, and ensure schema migrations."""
     for attempt in range(1, max_retries + 1):
         try:
             Base.metadata.create_all(bind=engine)
+            with engine.connect() as conn:
+                try:
+                    conn.execute(text("ALTER TABLE conversations ADD COLUMN is_starred BOOLEAN DEFAULT FALSE"))
+                    conn.commit()
+                except Exception:
+                    pass
             logger.info("Database ready")
             return
         except OperationalError as exc:
