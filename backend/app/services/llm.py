@@ -15,15 +15,53 @@ from app.services.local_fallback import local_chat_response
 settings = get_settings()
 
 
+def _extract_file_text(file_path: Path) -> str:
+    if not file_path.exists():
+        return ""
+    suffix = file_path.suffix.lower()
+    if suffix == ".pdf":
+        try:
+            import pypdf
+            reader = pypdf.PdfReader(file_path)
+            pages = []
+            for page in reader.pages[:10]:
+                t = page.extract_text()
+                if t:
+                    pages.append(t)
+            return "\n".join(pages).strip()
+        except Exception:
+            pass
+    try:
+        content = file_path.read_text(encoding="utf-8", errors="ignore")
+        printable = "".join(c for c in content if c.isprintable() or c in ("\n", "\r", "\t"))
+        return printable.strip()
+    except Exception:
+        return ""
+
+
 def _build_system_prompt(project: Project) -> str:
     parts = []
     if project.system_prompt:
         parts.append(project.system_prompt)
+
     if project.prompts:
-        parts.append("\nAdditional context:")
-        for p in project.prompts[:3]:
-            parts.append(f"[{p.name}] {p.content[:500]}")
-    return "\n".join(parts) if parts else "You are a helpful assistant."
+        parts.append("\n--- Additional Prompt Context ---")
+        for p in project.prompts[:5]:
+            parts.append(f"[{p.name}] {p.content[:1000]}")
+
+    if project.files:
+        upload_dir = Path(settings.upload_dir) / project.id
+        file_texts = []
+        for f in project.files[:5]:
+            fpath = upload_dir / f.filename
+            text = _extract_file_text(fpath)
+            if text:
+                file_texts.append(f"=== File: {f.original_name} ===\n{text[:4000]}\n=== End of {f.original_name} ===")
+        if file_texts:
+            parts.append("\n--- Uploaded Project Files & Documents Context ---")
+            parts.extend(file_texts)
+
+    return "\n\n".join(parts) if parts else "You are a helpful assistant."
 
 
 async def generate_chat_response(
