@@ -9,9 +9,18 @@ function FormattedMessage({ content }: { content: string }) {
   return (
     <div className="md-content">
       {lines.map((line, idx) => {
-        if (!line.trim()) return <div key={idx} style={{ height: '0.4rem' }} />;
+        const trimmed = line.trim();
+        if (['•', '-', '*'].includes(trimmed)) return null;
+        if (!trimmed) return <div key={idx} style={{ height: '0.4rem' }} />;
 
-        const parts = line.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`)/g);
+        const isBullet = trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('• ') || trimmed.startsWith('•');
+        let textContent = line;
+        if (isBullet) {
+          textContent = trimmed.replace(/^[•\-\*]\s*/, '');
+          if (!textContent.trim()) return null;
+        }
+
+        const parts = textContent.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`)/g);
         const renderedParts = parts.map((part, pIdx) => {
           if (part.startsWith('**') && part.endsWith('**')) {
             return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
@@ -25,12 +34,11 @@ function FormattedMessage({ content }: { content: string }) {
           return part;
         });
 
-        const trimmed = line.trim();
-        if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        if (isBullet) {
           return (
             <div key={idx} className="md-bullet">
               <span className="bullet-dot">•</span>
-              <span>{renderedParts.slice(1)}</span>
+              <span>{renderedParts}</span>
             </div>
           );
         }
