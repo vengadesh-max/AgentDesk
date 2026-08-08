@@ -45,6 +45,20 @@ export default function ProjectPage() {
     setMessages([]);
   };
 
+  const handleDeleteConversation = async (e: React.MouseEvent, convId: string) => {
+    e.stopPropagation();
+    if (!projectId) return;
+    try {
+      await api.deleteConversation(projectId, convId);
+      setConversations((prev) => prev.filter((c) => c.id !== convId));
+      if (activeConversation === convId) {
+        startNewChat();
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete chat');
+    }
+  };
+
   const sendMessage = async () => {
     if (!projectId || !input.trim() || sending) return;
     setSending(true);
@@ -126,8 +140,17 @@ export default function ProjectPage() {
                   className={`chat-sidebar-item ${activeConversation === c.id ? 'active' : ''}`}
                   onClick={() => loadConversation(c.id)}
                 >
-                  <span>{c.title || 'Untitled'}</span>
-                  <small>{new Date(c.created_at).toLocaleDateString()}</small>
+                  <div className="chat-sidebar-item-info">
+                    <span>{c.title || 'Untitled'}</span>
+                    <small>{new Date(c.created_at).toLocaleDateString()}</small>
+                  </div>
+                  <button
+                    className="btn-delete-conv"
+                    title="Delete chat"
+                    onClick={(e) => handleDeleteConversation(e, c.id)}
+                  >
+                    ✕
+                  </button>
                 </div>
               ))}
             </div>

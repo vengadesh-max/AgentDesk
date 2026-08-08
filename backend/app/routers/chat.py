@@ -61,6 +61,25 @@ def get_conversation(
     return conversation
 
 
+@router.delete("/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_conversation(
+    project_id: str,
+    conversation_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _get_owned_project(project_id, current_user, db)
+    conversation = (
+        db.query(Conversation)
+        .filter(Conversation.id == conversation_id, Conversation.project_id == project_id)
+        .first()
+    )
+    if not conversation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found")
+    db.delete(conversation)
+    db.commit()
+
+
 @router.post("", response_model=ChatResponse)
 async def send_message(
     project_id: str,

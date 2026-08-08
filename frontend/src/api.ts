@@ -145,6 +145,9 @@ export const api = {
   getConversation: (projectId: string, conversationId: string) =>
     request<Conversation>(`/projects/${projectId}/chat/conversations/${conversationId}`),
 
+  deleteConversation: (projectId: string, conversationId: string) =>
+    request<void>(`/projects/${projectId}/chat/conversations/${conversationId}`, { method: 'DELETE' }),
+
   sendMessage: (projectId: string, message: string, conversationId?: string) =>
     request<{ conversation_id: string; user_message: Message; assistant_message: Message }>(
       `/projects/${projectId}/chat`,

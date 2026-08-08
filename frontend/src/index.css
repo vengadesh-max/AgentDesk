@@ -258,9 +258,40 @@ label {
   font-size: 0.85rem;
   color: var(--text-muted);
   margin-bottom: 0.25rem;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  transition: all 0.15s;
+}
+
+.chat-sidebar-item-info {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-delete-conv {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 0.2rem 0.4rem;
+  opacity: 0.6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chat-sidebar-item:hover .btn-delete-conv {
+  opacity: 1;
+}
+
+.btn-delete-conv:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
 }
 
 .chat-sidebar-item:hover, .chat-sidebar-item.active {
