@@ -21,12 +21,14 @@ def _init_db(max_retries: int = 30, delay: float = 2.0) -> None:
     for attempt in range(1, max_retries + 1):
         try:
             Base.metadata.create_all(bind=engine)
-            with engine.connect() as conn:
-                try:
-                    conn.execute(text("ALTER TABLE conversations ADD COLUMN is_starred BOOLEAN DEFAULT FALSE"))
-                    conn.commit()
-                except Exception:
-                    pass
+            with engine.begin() as conn:
+                if settings.database_url.startswith("sqlite"):
+                    try:
+                        conn.execute(text("ALTER TABLE conversations ADD COLUMN is_starred BOOLEAN DEFAULT FALSE"))
+                    except Exception:
+                        pass
+                else:
+                    conn.execute(text("ALTER TABLE conversations ADD COLUMN IF NOT EXISTS is_starred BOOLEAN DEFAULT FALSE"))
             logger.info("Database ready")
             return
         except OperationalError as exc:
