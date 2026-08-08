@@ -4,6 +4,43 @@ import { api, Conversation, Message, Project, Prompt, ProjectFile } from '../api
 
 type Tab = 'chat' | 'prompts' | 'settings' | 'files';
 
+function FormattedMessage({ content }: { content: string }) {
+  const lines = content.split('\n');
+  return (
+    <div className="md-content">
+      {lines.map((line, idx) => {
+        if (!line.trim()) return <div key={idx} style={{ height: '0.4rem' }} />;
+
+        const parts = line.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`)/g);
+        const renderedParts = parts.map((part, pIdx) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
+          }
+          if (part.startsWith('*') && part.endsWith('*')) {
+            return <em key={pIdx}>{part.slice(1, -1)}</em>;
+          }
+          if (part.startsWith('`') && part.endsWith('`')) {
+            return <code key={pIdx} className="inline-code">{part.slice(1, -1)}</code>;
+          }
+          return part;
+        });
+
+        const trimmed = line.trim();
+        if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+          return (
+            <div key={idx} className="md-bullet">
+              <span className="bullet-dot">•</span>
+              <span>{renderedParts.slice(1)}</span>
+            </div>
+          );
+        }
+
+        return <div key={idx} className="md-line">{renderedParts}</div>;
+      })}
+    </div>
+  );
+}
+
 export default function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const [project, setProject] = useState<Project | null>(null);
@@ -203,7 +240,7 @@ export default function ProjectPage() {
               {messages.map((m) => (
                 <div key={m.id} className={`message ${m.role}`}>
                   <span className="message-role">{m.role === 'user' ? 'You' : 'BOT'}</span>
-                  {m.content}
+                  {m.role === 'user' ? m.content : <FormattedMessage content={m.content} />}
                 </div>
               ))}
               <div ref={messagesEndRef} />

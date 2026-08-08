@@ -315,6 +315,36 @@ label {
   color: var(--text);
 }
 
+.md-content {
+  line-height: 1.5;
+}
+
+.md-line {
+  margin-bottom: 0.2rem;
+}
+
+.md-bullet {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-left: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.bullet-dot {
+  color: var(--primary);
+  font-weight: bold;
+}
+
+.inline-code {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85em;
+}
+
 .chat-main {
   flex: 1;
   display: flex;
