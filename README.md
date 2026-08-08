@@ -4,6 +4,10 @@ A minimal, full-stack Chatbot Platform providing user authentication, multi-tena
 
 ---
 
+![AgentDesk System Architecture](docs/architecture.png)
+
+---
+
 ## Quick Testing Setup
 
 1. **Get Free Groq API Key**: Sign up at **[https://console.groq.com](https://console.groq.com)** and create an API key.
