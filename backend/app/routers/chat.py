@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.auth import get_current_user
 from app.database import get_db
 from app.models import Conversation, Message, Project, User
-from app.schemas import ChatRequest, ChatResponse, ConversationResponse, MessageResponse
+from app.schemas import ChatRequest, ChatResponse, ConversationResponse, ConversationUpdate, MessageResponse
 from app.services.llm import generate_chat_response
 
 router = APIRouter(prefix="/projects/{project_id}/chat", tags=["chat"])
@@ -36,7 +36,7 @@ def list_conversations(
         db.query(Conversation)
         .options(joinedload(Conversation.messages))
         .filter(Conversation.project_id == project_id)
-        .order_by(Conversation.created_at.desc())
+        .order_by(Conversation.is_starred.desc(), Conversation.created_at.desc())
         .all()
     )
     return conversations
@@ -58,6 +58,33 @@ def get_conversation(
     )
     if not conversation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found")
+    return conversation
+
+
+@router.patch("/conversations/{conversation_id}", response_model=ConversationResponse)
+def update_conversation(
+    project_id: str,
+    conversation_id: str,
+    payload: ConversationUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _get_owned_project(project_id, current_user, db)
+    conversation = (
+        db.query(Conversation)
+        .filter(Conversation.id == conversation_id, Conversation.project_id == project_id)
+        .first()
+    )
+    if not conversation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found")
+
+    if payload.is_starred is not None:
+        conversation.is_starred = payload.is_starred
+    if payload.title is not None:
+        conversation.title = payload.title
+
+    db.commit()
+    db.refresh(conversation)
     return conversation
 
 

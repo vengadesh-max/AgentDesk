@@ -48,6 +48,7 @@ export default function ProjectPage() {
   const handleDeleteConversation = async (e: React.MouseEvent, convId: string) => {
     e.stopPropagation();
     if (!projectId) return;
+    if (!confirm('Are you sure you want to delete this chat conversation?')) return;
     try {
       await api.deleteConversation(projectId, convId);
       setConversations((prev) => prev.filter((c) => c.id !== convId));
@@ -56,6 +57,22 @@ export default function ProjectPage() {
       }
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete chat');
+    }
+  };
+
+  const handleToggleStarConversation = async (e: React.MouseEvent, conv: Conversation) => {
+    e.stopPropagation();
+    if (!projectId) return;
+    try {
+      const newStarred = !conv.is_starred;
+      const updated = await api.updateConversation(projectId, conv.id, { is_starred: newStarred });
+      setConversations((prev) =>
+        prev
+          .map((c) => (c.id === conv.id ? { ...c, is_starred: updated.is_starred } : c))
+          .sort((a, b) => (Number(b.is_starred || false) - Number(a.is_starred || false)))
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update star status');
     }
   };
 
@@ -137,20 +154,29 @@ export default function ProjectPage() {
               {conversations.map((c) => (
                 <div
                   key={c.id}
-                  className={`chat-sidebar-item ${activeConversation === c.id ? 'active' : ''}`}
+                  className={`chat-sidebar-item ${activeConversation === c.id ? 'active' : ''} ${c.is_starred ? 'starred' : ''}`}
                   onClick={() => loadConversation(c.id)}
                 >
                   <div className="chat-sidebar-item-info">
-                    <span>{c.title || 'Untitled'}</span>
+                    <span>{c.is_starred ? '⭐ ' : ''}{c.title || 'Untitled'}</span>
                     <small>{new Date(c.created_at).toLocaleDateString()}</small>
                   </div>
-                  <button
-                    className="btn-delete-conv"
-                    title="Delete chat"
-                    onClick={(e) => handleDeleteConversation(e, c.id)}
-                  >
-                    ✕
-                  </button>
+                  <div className="chat-sidebar-actions">
+                    <button
+                      className={`btn-star-conv ${c.is_starred ? 'active' : ''}`}
+                      title={c.is_starred ? 'Unstar conversation' : 'Star conversation'}
+                      onClick={(e) => handleToggleStarConversation(e, c)}
+                    >
+                      {c.is_starred ? '⭐' : '☆'}
+                    </button>
+                    <button
+                      className="btn-delete-conv"
+                      title="Delete conversation"
+                      onClick={(e) => handleDeleteConversation(e, c.id)}
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

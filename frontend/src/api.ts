@@ -37,6 +37,7 @@ export interface Conversation {
   id: string;
   project_id: string;
   title: string | null;
+  is_starred?: boolean;
   created_at: string;
   messages: Message[];
 }
@@ -144,6 +145,12 @@ export const api = {
 
   getConversation: (projectId: string, conversationId: string) =>
     request<Conversation>(`/projects/${projectId}/chat/conversations/${conversationId}`),
+
+  updateConversation: (projectId: string, conversationId: string, data: { is_starred?: boolean; title?: string }) =>
+    request<Conversation>(`/projects/${projectId}/chat/conversations/${conversationId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
 
   deleteConversation: (projectId: string, conversationId: string) =>
     request<void>(`/projects/${projectId}/chat/conversations/${conversationId}`, { method: 'DELETE' }),

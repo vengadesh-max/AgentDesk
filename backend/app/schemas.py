@@ -90,10 +90,16 @@ class MessageResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ConversationUpdate(BaseModel):
+    is_starred: bool | None = None
+    title: str | None = None
+
+
 class ConversationResponse(BaseModel):
     id: str
     project_id: str
     title: str | None
+    is_starred: bool = False
     created_at: datetime
     messages: list[MessageResponse] = []
 
