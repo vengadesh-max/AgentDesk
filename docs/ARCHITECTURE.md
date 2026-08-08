@@ -8,30 +8,41 @@ The Chatbot Platform (AgentDesk) is a full-stack web application that enables us
 
 ## System Architecture
 
+```mermaid
+graph TD
+    subgraph Client["Frontend Client (React 18 + TypeScript + Vite)"]
+        UI["Auth Pages | Agent Dashboard | BOT Chat UI | Prompt Library"]
+    end
+
+    subgraph Backend["FastAPI Backend Server (Python 3.12)"]
+        AuthR["Auth Router (JWT/bcrypt)"]
+        ProjR["Projects Router (Agents)"]
+        PromR["Prompts Router"]
+        ChatR["Chat Router (BOT Engine)"]
+        FileR["Files Router (Attachments)"]
+        ORM["SQLAlchemy ORM Layer"]
+    end
+
+    subgraph Storage["Database Layer"]
+        DB[("PostgreSQL 16 / SQLite")]
+    end
+
+    subgraph External["External Services"]
+        Groq["Groq API (llama-3.1-8b-instant)\nconsole.groq.com"]
+    end
+
+    UI -->|HTTPS / REST + Bearer JWT Token| AuthR
+    UI --> ProjR
+    UI --> PromR
+    UI --> ChatR
+    UI --> FileR
+
+    AuthR & ProjR & PromR & ChatR & FileR --> ORM
+    ORM --> DB
+    ChatR -->|Async HTTP API Call| Groq
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        Client (Browser)                      │
-│            React SPA — Auth, Dashboard, BOT Chat UI          │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ HTTPS / REST + JWT
-┌──────────────────────────▼──────────────────────────────────┐
-│                     FastAPI Backend                         │
-│  ┌─────────┐ ┌──────────┐ ┌──────┐ ┌──────────┐ ┌───────┐ │
-│  │  Auth   │ │ Projects │ │ Chat │ │ Prompts  │ │ Files │ │
-│  │ (JWT)   │ │  Router  │ │Router│ │  Router  │ │Router │ │
-│  └────┬────┘ └────┬─────┘ └──┬───┘ └────┬─────┘ └───┬───┘ │
-│       └───────────┴──────────┴──────────┴───────────┘     │
-│                           │                                  │
-│                    SQLAlchemy ORM                            │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-         ┌─────────────────┴─────────────────┐
-         │                                   │
-    ┌────▼────────┐                    ┌─────▼───────┐
-    │ PostgreSQL /│                    │  Groq API   │
-    │   SQLite    │                    │(console.groq)│
-    └─────────────┘                    └─────────────┘
-```
+
+> **Excalidraw Diagram File**: An editable Excalidraw diagram file is available at [docs/architecture_diagram.excalidraw](file:///e:/agent%20%281%29/agent/docs/architecture_diagram.excalidraw). You can drag and drop it directly into **[excalidraw.com](https://excalidraw.com)** to edit or present!
 
 ---
 
